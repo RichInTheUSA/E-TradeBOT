@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<actions>
+        <action>
+            <actionName>run</actionName>
+            <packagings>
+                <packaging>jar</packaging>
+            </packagings>
+            <goals>
+                <goal>process-classes</goal>
+                <goal>org.codehaus.mojo:exec-maven-plugin:1.2.1:exec</goal>
+            </goals>
+            <properties>
+                <exec.args>-classpath %classpath com.cisco.mavensmartsbot.SSBot</exec.args>
+                <exec.executable>java</exec.executable>
+                <Env.SSAT>MTM0ODMzZTEtZGRjMC00ZDgyLThmMGEtMjJmZWE4ZWNiZDhhYzdiODVlMDUtYTJl</Env.SSAT>
+                <Env.SSPID>Y2lzY29zcGFyazovL3VzL1BFT1BMRS84NWIyMzEyOS1mOWFhLTQ1MGYtOGMzYi1hM2YyYTkwZDljM2Q</Env.SSPID>
+                
+                
+                
+                <Env.SST>2qf54pxd66b1ax31odkb63r3s8</Env.SST>
+                
+                
+                
+                <Env.BOTPORT>5671</Env.BOTPORT>
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+            </properties>
+        </action>
+        <action>
+            <actionName>debug</actionName>
+            <packagings>
+                <packaging>jar</packaging>
+            </packagings>
+            <goals>
+                <goal>process-classes</goal>
+                <goal>org.codehaus.mojo:exec-maven-plugin:1.2.1:exec</goal>
+            </goals>
+            <properties>
+                <exec.args>-Xdebug -Xrunjdwp:transport=dt_socket,server=n,address=${jpda.address} -classpath %classpath com.cisco.mavensmartsbot.SSBot</exec.args>
+                <exec.executable>java</exec.executable>
+                <jpda.listen>true</jpda.listen>
+            </properties>
+        </action>
+        <action>
+            <actionName>profile</actionName>
+            <packagings>
+                <packaging>jar</packaging>
+            </packagings>
+            <goals>
+                <goal>process-classes</goal>
+                <goal>org.codehaus.mojo:exec-maven-plugin:1.2.1:exec</goal>
+            </goals>
+            <properties>
+                <exec.args>-classpath %classpath com.cisco.mavensmartsbot.SSBot</exec.args>
+                <exec.executable>java</exec.executable>
+            </properties>
+        </action>
+    </actions>
