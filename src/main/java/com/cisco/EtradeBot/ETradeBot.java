@@ -3,10 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.cisco.mavensmartsbot;
+package com.cisco.EtradeBot;
 
 
-import static com.cisco.mavensmartsbot.SmartSheet.processSmartSheetRequest;
+import static com.cisco.EtradeBot.SmartSheet.processSmartSheetRequest;
 import com.ciscospark.Message;
 import com.ciscospark.Spark;
 import com.ciscospark.Webhook;
@@ -26,7 +26,7 @@ import java.util.logging.Logger;
  *
  * @author richverjinski
  */
-public class SSBot {
+public class ETradeBot {
 
     // Declare a few public static variables needed to talk to the Cisco Spark Server
 
@@ -47,25 +47,16 @@ public class SSBot {
     public static URI myTargetURI = null;
     
     
-    // Set the accessToken of the bot.  Get a new bot token at
-    // https://developer.ciscospark.com/getting-started.html
-    
-    
     /**
      *  This the person Id of the bot. When creating a new bot, I generally
      *  receive this via the API, and then capture it here.  It's used so that
      *  the bot does not respond to questions from itself (which can cause an infinite loop).
      * 
-     *  change
-     *  Ben Change
-     *  This is Rich's change.
      */
     public static String myPersonId = Credentials.getMyPersonId();
 
     /**
      *  This is a secret key that's been assigned to the bot.  Each bot will have one.
-     *  If you want to create a new bot, then get a new key at https://developer.ciscospark.com/apps.html
-     *  This key belongs to RichTestBot
      */
     public static String accessToken = Credentials.getMyAccessToken();
     
@@ -78,11 +69,15 @@ public class SSBot {
         //This section initializes the bot.
         System.out.println("Start Initializing");
         
+        // Initialize the ETrade API
+        
+        System.out.println("... Initializing Etrade API");
+        
         // Initialize SmartSheet API
         try {
             SmartSheet.initializeSmartSheetAPI();
         } catch (SmartsheetException ex) {
-            Logger.getLogger(SSBot.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ETradeBot.class.getName()).log(Level.SEVERE, null, ex);
         }  
         System.out.println("... Initializing SmartSheet API");
       
@@ -283,7 +278,7 @@ public class SSBot {
             }
             myTargetURI = myTargetURL.toURI();
         } catch (MalformedURLException | URISyntaxException ex) {
-            Logger.getLogger(SSBot.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ETradeBot.class.getName()).log(Level.SEVERE, null, ex);
         }
         StringBuilder s = new StringBuilder();
        
@@ -437,7 +432,7 @@ public class SSBot {
                     try {
                        outboundMessage = processSmartSheetRequest(roomId, message, personId);
                     } catch (SmartsheetException ex) {
-                        Logger.getLogger(SSBot.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(ETradeBot.class.getName()).log(Level.SEVERE, null, ex);
                     }
     }
                 else {
@@ -453,7 +448,7 @@ public class SSBot {
             }
             
             // Send the resulting message back to the user!
-            SSBot.sendMessage( roomId, outboundMessage, personId);
+            ETradeBot.sendMessage( roomId, outboundMessage, personId);
             
         } 
     }  

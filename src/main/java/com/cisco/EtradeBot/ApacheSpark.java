@@ -2,13 +2,12 @@
  * This file defines the Apache Spark server requests
  * and then invokes respective 
  */
-package com.cisco.mavensmartsbot;
+package com.cisco.EtradeBot;
 
 import java.io.StringReader;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
-
 
 import spark.Request;
 import spark.Response;
@@ -34,57 +33,57 @@ public class ApacheSpark {
       get("/help", (request, response) -> {
           response.status(200);
           return ("SSBot.help()");
-          //return (SSBot.help()); 
+          //return (ETradeBot.help()); 
       });
     
       get("/adminhelp", (request, response) -> {
         response.status(200);
-        return (SSBot.adminHelp()); 
+        return (ETradeBot.adminHelp()); 
       });
     
       get("/createwebhook", (request, response) -> {
         response.status(200);
-        return SSBot.createWebHook(""); 
+        return ETradeBot.createWebHook(""); 
       });
     
       get("/hello", (request, response) -> {
         response.status(200);
-        return (SSBot.hello());
+        return (ETradeBot.hello());
       });
     
       get("/support", (request, response) -> {
         response.status(200);
-        return (SSBot.support());
+        return (ETradeBot.support());
       });
       
       get("/privacy", (request, response) -> {
         response.status(200);
-        return (SSBot.privacy());
+        return (ETradeBot.privacy());
       });
     
       get("/listrooms", (Request request, Response response) -> {
         response.status(200);
-        return SSBot.listRooms();
+        return ETradeBot.listRooms();
       });
     
       get("/listwebhooks", (Request request, Response response) -> {
         response.status(200);
-        return SSBot.listWebHooks();
+        return ETradeBot.listWebHooks();
       });
     
       get("/deletewebhook/:name", (Request request, Response response) -> {
         response.status(200);
-        return SSBot.deleteWebHook(request.params(":name"));
+        return ETradeBot.deleteWebHook(request.params(":name"));
       });
       
       get("/deleteallwebhooksbut/:name", (Request request, Response response) -> {
         response.status(200);
-        return SSBot.deleteAllWebHooksBut(request.params(":name"));
+        return ETradeBot.deleteAllWebHooksBut(request.params(":name"));
       });      
     
       get("/getmessages", (Request request, Response response) -> {
         response.status(200);
-        return SSBot.getMessages();
+        return ETradeBot.getMessages();
       });
         
     post("/webhook", (request, response) -> {
@@ -95,7 +94,7 @@ public class ApacheSpark {
             JsonObject messageBody = jsonreader.readObject();
             messageData = messageBody.getJsonObject("data");
  
-            SSBot.processMessages( messageData.getString("roomId"),
+            ETradeBot.processMessages( messageData.getString("roomId"),
                     messageData.getString("id"),
                     messageData.getString("personId"));
             return ("200");

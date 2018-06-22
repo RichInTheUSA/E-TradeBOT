@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.cisco.mavensmartsbot;
+package com.cisco.EtradeBot;
 
 import com.smartsheet.api.models.Folder;
 import java.util.List;

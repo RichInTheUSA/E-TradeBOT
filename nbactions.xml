@@ -12,32 +12,15 @@
             <properties>
                 <exec.args>-classpath %classpath com.cisco.mavensmartsbot.SSBot</exec.args>
                 <exec.executable>java</exec.executable>
-                <Env.SSAT>MTM0ODMzZTEtZGRjMC00ZDgyLThmMGEtMjJmZWE4ZWNiZDhhYzdiODVlMDUtYTJl</Env.SSAT>
-                <Env.SSPID>Y2lzY29zcGFyazovL3VzL1BFT1BMRS84NWIyMzEyOS1mOWFhLTQ1MGYtOGMzYi1hM2YyYTkwZDljM2Q</Env.SSPID>
-                
+                <Env.BOTAT>MTM0ODMzZTEtZGRjMC00ZDgyLThmMGEtMjJmZWE4ZWNiZDhhYzdiODVlMDUtYTJl</Env.BOTAT>
+                <Env.BOTPID>Y2lzY29zcGFyazovL3VzL1BFT1BMRS84NWIyMzEyOS1mOWFhLTQ1MGYtOGMzYi1hM2YyYTkwZDljM2Q</Env.BOTPID>
                 
                 
                 <Env.SST>2qf54pxd66b1ax31odkb63r3s8</Env.SST>
-                
-                
-                
                 <Env.BOTPORT>5671</Env.BOTPORT>
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
+                <Env.ETCK>f032f32e09d12e8bc49a73832220e54b</Env.ETCK>
+                <Env.ETCS>255f7e0b09c427b4fec73f949ba58079</Env.ETCS>
+
             </properties>
         </action>
         <action>

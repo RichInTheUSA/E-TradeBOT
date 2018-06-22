@@ -3,9 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.cisco.mavensmartsbot;
+package com.cisco.EtradeBot;
 
-import static com.cisco.mavensmartsbot.SSBot.myGetDisplayName;
+import static com.cisco.EtradeBot.ETradeBot.myGetDisplayName;
 import com.ciscospark.Message;
 import com.smartsheet.api.*;
 import com.smartsheet.api.models.*;
@@ -759,7 +759,7 @@ public class SmartSheet {
                             }
                         }    
                     }
-                    SSBot.sendMessage(RoomId, response.toString(), personId);
+                    ETradeBot.sendMessage(RoomId, response.toString(), personId);
                 }           
             }
         
@@ -774,7 +774,7 @@ public class SmartSheet {
                     }
                 }
     
-                SSBot.sendMessage(RoomId, response.toString(), personId);
+                ETradeBot.sendMessage(RoomId, response.toString(), personId);
                 response = new StringBuilder();
             } else if (message.contains("yellow")) {
                 response.append("**Programs with Yellow status are:** \n");
@@ -784,7 +784,7 @@ public class SmartSheet {
                         response.append("-  ").append(prog.getProgramName()).append("  \n"); 
                     }
                 }
-                SSBot.sendMessage(RoomId, response.toString(), personId);
+                ETradeBot.sendMessage(RoomId, response.toString(), personId);
                 response = new StringBuilder(); 
             }  else if (message.contains("red")) {
                 response.append("**Programs with Red status are:** \n");
@@ -794,7 +794,7 @@ public class SmartSheet {
                         response.append("-  ").append(prog.getProgramName()).append("  \n"); 
                     }
                 }
-                SSBot.sendMessage(RoomId, response.toString(), personId);
+                ETradeBot.sendMessage(RoomId, response.toString(), personId);
                 response = new StringBuilder(); 
             }  else {
                 response.append("**Programs without updated status for "+ getCurrentMonth() + " are:** \n");
@@ -808,7 +808,7 @@ public class SmartSheet {
                         }
                     }
                 }
-                SSBot.sendMessage(RoomId, response.toString(), personId);
+                ETradeBot.sendMessage(RoomId, response.toString(), personId);
                 response = new StringBuilder(); 
             }
             
@@ -861,7 +861,7 @@ public class SmartSheet {
                     counter++;
                     if (counter > 7) {
                         counter = 0;
-                        SSBot.sendMessage(RoomId, response.toString(), personId);
+                        ETradeBot.sendMessage(RoomId, response.toString(), personId);
                         response = new StringBuilder();
                     }
                 }
