@@ -11,7 +11,9 @@ import com.ciscospark.Message;
 import com.ciscospark.Spark;
 import com.ciscospark.Webhook;
 import com.ciscospark.Person;
+import com.etrade.etws.sdk.common.ETWSException;
 import com.smartsheet.api.SmartsheetException;
+import java.io.IOException;
 
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -64,16 +66,24 @@ public class ETradeBot {
      * This is the main method of the Application.
      * @param args the command line arguments... but it does not take any.
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws ETWSException {
         
         //This section initializes the bot.
         System.out.println("Start Initializing");
         
         // Initialize the ETrade API
-        
+        ETrade e = new ETrade();
+        try { 
+            e.initETrade();
+        } catch (ETWSException ex) {
+            Logger.getLogger(ETradeBot.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ie) {
+            Logger.getLogger(ETradeBot.class.getName()).log(Level.SEVERE, null, ie);
+        }
         System.out.println("... Initializing Etrade API");
         
         // Initialize SmartSheet API
+        /*
         try {
             SmartSheet.initializeSmartSheetAPI();
         } catch (SmartsheetException ex) {
@@ -87,7 +97,8 @@ public class ETradeBot {
         .accessToken(accessToken)
         .build();
         System.out.println("... Initializing Cisco Spark API");
-  
+        */
+        
         // Initialize the Apache Spark server
         ApacheSpark apache = new ApacheSpark();
         System.out.println("... Initializing Apache Spark API");
