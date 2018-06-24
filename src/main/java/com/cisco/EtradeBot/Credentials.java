@@ -55,7 +55,7 @@ public class Credentials {
         return p;
     }   
     
-    private static final String myWebhook = "http://fe51f577.ngrok.io/webhook";
+    private static final String myWebhook = "http://ec6b231c.ngrok.io/webhook";
     
     public static String getMyWebhook() {
         return myWebhook;

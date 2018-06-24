@@ -62,6 +62,8 @@ public class ETradeBot {
      */
     public static String accessToken = Credentials.getMyAccessToken();
     
+    public static ETrade e;
+    
     /**
      * This is the main method of the Application.
      * @param args the command line arguments... but it does not take any.
@@ -70,17 +72,6 @@ public class ETradeBot {
         
         //This section initializes the bot.
         System.out.println("Start Initializing");
-        
-        // Initialize the ETrade API
-        ETrade e = new ETrade();
-        try { 
-            e.initETrade();
-        } catch (ETWSException ex) {
-            Logger.getLogger(ETradeBot.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ie) {
-            Logger.getLogger(ETradeBot.class.getName()).log(Level.SEVERE, null, ie);
-        }
-        System.out.println("... Initializing Etrade API");
         
         // Initialize SmartSheet API
         /*
@@ -91,13 +82,14 @@ public class ETradeBot {
         }  
         System.out.println("... Initializing SmartSheet API");
       
+        */
         // Initialize Cisco Spark API
         spark = Spark.builder()
         .baseUrl(URI.create("https://api.ciscospark.com/v1"))
         .accessToken(accessToken)
         .build();
         System.out.println("... Initializing Cisco Spark API");
-        */
+      
         
         // Initialize the Apache Spark server
         ApacheSpark apache = new ApacheSpark();
@@ -105,6 +97,14 @@ public class ETradeBot {
         
         System.out.println("Spark Bot Initialized!  \n\n");
     
+            // Initialize the ETrade API
+     
+        e = new ETrade();
+        System.out.println("... Initializing Etrade API");
+        
+        // e.getAccountList();
+        // System.out.println("... Finished account list");
+        
     }
 
     /**
@@ -167,8 +167,7 @@ public class ETradeBot {
      * @return
      */
     public static String support() {
-        return "Rich Verjinski, rverjins@cisco.com and Ben Buell, bebuell@cisco.com  \n" +
-               "Please see the support page on jive. https://cisco.jiveon.com/docs/DOC-1740529 ";
+        return "Rich Verjinski, rverjins@cisco.com  \n";
     }
     
     /**
@@ -295,7 +294,7 @@ public class ETradeBot {
        
         // Create a new Webhook object, fill in the parameters, and post!
         Webhook myWebhook = new Webhook();
-        myWebhook.setName("Spark2SmartSheet Webhook");
+        myWebhook.setName("Etrade Webhook");
         myWebhook.setTargetUrl(myTargetURI);
         myWebhook.setResource("messages");
         myWebhook.setEvent("created");
@@ -369,16 +368,12 @@ public class ETradeBot {
             // This checks to see if the message received is from the Bot itself.
             // If so.. ignore it, as we dont want get into an endless loop.
         } else {
-
-            // Get the message
-            Message message = spark.messages().path("/"+ messageId,Message.class).get();
-            //System.out.println("Received roomId: " + message.getId());
-            System.out.println("Received from : " + message.getPersonEmail());
-            System.out.println("Received personId: " +message.getPersonId());
+            
+            Message message = spark.messages().path("/"+ messageId, Message.class).get();
+            System.out.println("\nReceived from : " + message.getPersonEmail());
             
             // Check to see if the user is in the correct domain.
             if ( message.getPersonEmail().contains(Credentials.getEmailDomain()) ) { 
-                System.out.println("Received personId: " +message.getPersonId());
                 System.out.println("Received: " + message.getText());
 
                 // Convert the message to all lower case... it's a lot easier to parse.
@@ -421,8 +416,7 @@ public class ETradeBot {
                     }                    
                     outboundMessage = deleteAllWebHooksBut(theID);
                 }                
-                else if (s.contains("create webhook")) { 
-                    System.out.println("got into theHook");                    
+                else if (s.contains("create webhook")) {                     
                     StringTokenizer st;
                     String word, theHook = "";
                     st = new StringTokenizer(message.getText());
@@ -439,16 +433,53 @@ public class ETradeBot {
                 
                 }                
                 else if (s.contains("get messages")) { outboundMessage = getMessages();}
-                else if (s.contains("folders") || s.contains("workspace") || s.contains("sheets") || s.contains("columns") || s.contains("program") || s.contains("portfolio") || s.contains("search") || s.contains("set-token")) { 
-                    try {
-                       outboundMessage = processSmartSheetRequest(roomId, message, personId);
-                    } catch (SmartsheetException ex) {
+                
+                /**************************************************************/
+                /* Add Etrade App Specific Commands here                      */
+                /**************************************************************/
+                
+                else if (s.contains("init etrade"))  { 
+                    
+                    try { 
+                        e.initETrade();
+                    } catch (ETWSException ex) {
                         Logger.getLogger(ETradeBot.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (IOException ie) {
+                        Logger.getLogger(ETradeBot.class.getName()).log(Level.SEVERE, null, ie);
                     }
-    }
+                    
+                    obm.append("Please log into E*Trade to get a verification key  \n");
+                    obm.append("Type *key* followed by the verification key.");
+                    obm.append("Dont worry... this is sandbox data!");
+                    outboundMessage = obm.toString();
+                
+                }
+                else if (s.contains("key"))  { 
+                    
+                    try { 
+                        e.parseETradeKey(s);
+                    } catch (ETWSException ex) {
+                        Logger.getLogger(ETradeBot.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (IOException ie) {
+                        Logger.getLogger(ETradeBot.class.getName()).log(Level.SEVERE, null, ie);
+                    }
+                    outboundMessage = "Successfully logged into E*Trade  \n";
+                
+                }
+                else if (s.contains("show accounts"))  { 
+                    
+                    try { 
+                        outboundMessage = e.showAccountList();
+                    } catch (ETWSException ex) {
+                        Logger.getLogger(ETradeBot.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (IOException ie) {
+                        Logger.getLogger(ETradeBot.class.getName()).log(Level.SEVERE, null, ie);
+                    }
+                
+                }
                 else {
                    obm.append("I heard you say: ").append(message.getText()).append("  \n");
-                   obm.append("Not really sure what to do with that.  \n");
+                   obm.append("Not really sure what to do with that.  \n\n");
                    obm.append(help());
                    outboundMessage = obm.toString();
                 }

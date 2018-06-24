@@ -30,9 +30,9 @@ public class ApacheSpark {
       int p = Credentials.getApacheSparkPort();
       port(p); 
     
-      get("/help", (request, response) -> {
+      get("/help", (Request request, Response response) -> {
           response.status(200);
-          return ("SSBot.help()");
+          return ("EtradeBot.help()");
           //return (ETradeBot.help()); 
       });
     
@@ -86,14 +86,14 @@ public class ApacheSpark {
         return ETradeBot.getMessages();
       });
         
-    post("/webhook", (request, response) -> {
+    post("/webhook", (Request request, Response response) -> {
         response.status(200); 
-        //System.out.println ("Got a hook, parsing data... ");
+        
         JsonObject messageData;
         try (JsonReader jsonreader = Json.createReader(new StringReader(request.body()))) {
             JsonObject messageBody = jsonreader.readObject();
             messageData = messageBody.getJsonObject("data");
- 
+                        
             ETradeBot.processMessages( messageData.getString("roomId"),
                     messageData.getString("id"),
                     messageData.getString("personId"));

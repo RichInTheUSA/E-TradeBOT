@@ -10,6 +10,7 @@ import static com.cisco.EtradeBot.Credentials.getEtradeConsumerSecret;
 import com.etrade.etws.account.Account;
 import com.etrade.etws.account.AccountBalanceResponse;
 import com.etrade.etws.account.AccountListResponse;
+import com.etrade.etws.account.AccountPositionsResponse;
 import com.etrade.etws.oauth.sdk.client.IOAuthClient;
 import com.etrade.etws.oauth.sdk.client.OAuthClientImpl;
 import com.etrade.etws.oauth.sdk.common.Token;
@@ -25,6 +26,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Iterator;
 import java.util.List;
+import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.httpclient.contrib.ssl.*;
@@ -36,64 +38,70 @@ import org.apache.commons.httpclient.contrib.ssl.*;
  */
 public class ETrade {
 
-        public IOAuthClient client = null;
-        public ClientRequest request = null;
-        public Token token = null;
-        public String oauth_consumer_key = null; // Your consumer key
-        public String oauth_consumer_secret = null; // Your consumer secret
-        public String oauth_request_token = null; // Request token 
-        public String oauth_request_token_secret = null; // Request token secret 
+    public IOAuthClient client = null;
+    public ClientRequest request = null;
+    public Token token = null;
+    public String oauth_consumer_key = null;        // Your consumer key
+    public String oauth_consumer_secret = null;     // Your consumer secret
+    public String oauth_request_token = null;       // Request token 
+    public String oauth_request_token_secret = null; // Request token secret 
     
     public void initETrade() throws IOException, ETWSException  { 
  
-        client = OAuthClientImpl.getInstance(); // Instantiate IOAUthClient
+        client = OAuthClientImpl.getInstance();         // Instantiate IOAUthClient
         
-        oauth_consumer_key = getEtradeConsumerKey();
-        oauth_consumer_secret = getEtradeConsumerSecret();
-        System.out.println ("Consumer key: " + oauth_consumer_key);
-        System.out.println ("Consumer secret: " + oauth_consumer_secret);
+        oauth_consumer_key = Credentials.getEtradeConsumerKey();
+        oauth_consumer_secret = Credentials.getEtradeConsumerSecret();
+        //System.out.println ("Consumer key: " + oauth_consumer_key);
+        //System.out.println ("Consumer secret: " + oauth_consumer_secret);
         
+        request = new ClientRequest();                  // Instantiate ClientRequest
+        request.setEnv(Environment.SANDBOX);            // Use sandbox environment
         
-        request = new ClientRequest(); // Instantiate ClientRequest
-
-        request.setEnv(Environment.SANDBOX); // Use sandbox environment
-
-        request.setConsumerKey(oauth_consumer_key); //Set consumer key
+        request.setConsumerKey(oauth_consumer_key);       //Set consumer key
         request.setConsumerSecret(oauth_consumer_secret); // Set consumer secret
         
-        token= client.getRequestToken(request); // Get request-token object
-        oauth_request_token  = token.getToken(); // Get token string
+        token= client.getRequestToken(request);         // Get request-token object
+        oauth_request_token  = token.getToken();        // Get token string
         oauth_request_token_secret = token.getSecret(); // Get token secret
         
-        System.out.println ("oauth_request_token: " + oauth_request_token);
-        System.out.println ("oauth_request_token_secret: " + oauth_request_token_secret);
+        //System.out.println ("Oauth_request_token: " + oauth_request_token);
+        //System.out.println ("Oauth_request_token_secret: " + oauth_request_token_secret);
         
-        request.setToken(oauth_request_token);
+        request.setToken(oauth_request_token);          // Now that we have the token, use it in our requests.
         request.setTokenSecret(oauth_request_token_secret);
 
-        System.out.println("Next Step");
-        
-        
-  
-        String authorizeURL = null;
+        String authorizeURL = null;                     // Get the URL to authorize access.
         authorizeURL = client.getAuthorizeUrl(request);
-        System.out.println("Authorization URL is: " + authorizeURL);
-        System.out.println("Copy the URL into your browser. Get the verification code and type here");
+        //System.out.println("Authorization URL is: " + authorizeURL);
         
-            try {
-                URI uri = new java.net.URI(authorizeURL);
-                Desktop desktop = Desktop.getDesktop();
-                desktop.browse(uri);
-            } catch (URISyntaxException ex) {
-                Logger.getLogger(ETrade.class.getName()).log(Level.SEVERE, null, ex);
+        // Launch a browser window, which will take the user to Etrade.com to get a verification code.
+        try {
+            URI uri = new java.net.URI(authorizeURL);
+            Desktop desktop = Desktop.getDesktop();
+            desktop.browse(uri);
+        } catch (URISyntaxException ex) {
+            Logger.getLogger(ETrade.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    public void parseETradeKey(String message) throws IOException, ETWSException { 
+
+        // Get the verify code from the user
+        // String oauth_verify_code = get_verification_code();
+        String word;
+        String oauth_verify_code = null;
+        
+        StringTokenizer st = new StringTokenizer(message);
+        while (st.hasMoreTokens()) {
+            word = st.nextToken();
+            if (word.equals("key")) {
+                oauth_verify_code =st.nextToken();
             }
+        }
+        System.out.println("Verification code is: " + oauth_verify_code.toUpperCase());
         
-
-            System.out.println("calling get_verification_code");
-            String oauth_verify_code = get_verification_code();
-            //oauth_verify_code = Verification(client,request);
-
-        request.setVerifierCode(oauth_verify_code);
+        request.setVerifierCode(oauth_verify_code.toUpperCase());
         
         token = client.getAccessToken(request);
         String oauth_access_token = token.getToken();
@@ -105,33 +113,37 @@ public class ETrade {
         request.setToken(oauth_access_token);
         request.setTokenSecret(oauth_access_token_secret);
 		
-        // Get Account List
+    }
+    
+    public String showAccountList() throws IOException, ETWSException {
         
+        StringBuilder obm = new StringBuilder();
         try { 
-            AccountsClient account_client = new AccountsClient(request);
-            AccountListResponse response = account_client.getAccountList();
+                AccountsClient account_client = new AccountsClient(request);
+                AccountListResponse response = account_client.getAccountList();
 
+                List<Account> alist = response.getResponse();
+                Iterator<Account> al = alist.iterator();
+                while (al.hasNext()) {
+                    Account a = al.next();
 
-            List<Account> alist = response.getResponse();
-            Iterator<Account> al = alist.iterator();
-            while (al.hasNext()) {
-                Account a = al.next();
-
-                System.out.println("===================");
-                System.out.println("Account: " + a.getAccountId());
-                AccountBalanceResponse balance = account_client.getAccountBalance(a.getAccountId());
-                System.out.println("Cash Balance: " + balance.getAccountBalance());
-                System.out.println("===================");
-            }
-	} catch (Exception e) {
+                    obm.append("===================  \n");
+                    obm.append("Account Desc: " + a.getAccountDesc() + "  \n");
+                    obm.append("Account Id: " + a.getAccountId() + "  \n");
+                    obm.append("Account Margin Level: " + a.getMarginLevel() + "  \n");
+                    obm.append("Account Value: " + a.getNetAccountValue() + "  \n");
+                    obm.append("Account Registration: " + a.getRegistrationType() + "  \n");
+                    obm.append("===================  \n");
+                }
+        } catch (Exception e) {
         }
-      
-     
-        
-        }
-	
-	public static String get_verification_code() {
+        return obm.toString();
+    }
+    
 
+
+    public static String get_verification_code() {
+        System.out.print("Enter verification code: ");
         try{
             BufferedReader br =
             new BufferedReader(new InputStreamReader(System.in));
@@ -140,8 +152,6 @@ public class ETrade {
 
             input=br.readLine();
             return input;
-
-
         }catch(IOException io){
             io.printStackTrace();
             return "";
