@@ -432,7 +432,9 @@ public class ETradeBot {
                     outboundMessage = createWebHook(theHook);
                 
                 }                
-                else if (s.contains("get messages")) { outboundMessage = getMessages();}
+                else if (s.contains("get messages")) { 
+                    outboundMessage = getMessages();
+                }
                 
                 /**************************************************************/
                 /* Add Etrade App Specific Commands here                      */
@@ -441,35 +443,29 @@ public class ETradeBot {
                 else if (s.contains("init etrade"))  { 
                     
                     try { 
-                        e.initETrade();
+                        outboundMessage = e.initETrade(roomId, s, personId);
                     } catch (ETWSException ex) {
                         Logger.getLogger(ETradeBot.class.getName()).log(Level.SEVERE, null, ex);
                     } catch (IOException ie) {
                         Logger.getLogger(ETradeBot.class.getName()).log(Level.SEVERE, null, ie);
                     }
-                    
-                    obm.append("Please log into E*Trade to get a verification key  \n");
-                    obm.append("Type *key* followed by the verification key.");
-                    obm.append("Dont worry... this is sandbox data!");
-                    outboundMessage = obm.toString();
                 
                 }
                 else if (s.contains("key"))  { 
                     
                     try { 
-                        e.parseETradeKey(s);
+                        outboundMessage = e.parseETradeKey(roomId, s, personId);
                     } catch (ETWSException ex) {
                         Logger.getLogger(ETradeBot.class.getName()).log(Level.SEVERE, null, ex);
                     } catch (IOException ie) {
                         Logger.getLogger(ETradeBot.class.getName()).log(Level.SEVERE, null, ie);
                     }
-                    outboundMessage = "Successfully logged into E*Trade  \n";
                 
                 }
                 else if (s.contains("show accounts"))  { 
                     
                     try { 
-                        outboundMessage = e.showAccountList();
+                        outboundMessage = e.showAccountList(roomId, s, personId);
                     } catch (ETWSException ex) {
                         Logger.getLogger(ETradeBot.class.getName()).log(Level.SEVERE, null, ex);
                     } catch (IOException ie) {

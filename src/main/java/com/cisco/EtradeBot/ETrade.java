@@ -7,6 +7,7 @@ package com.cisco.EtradeBot;
 
 import static com.cisco.EtradeBot.Credentials.getEtradeConsumerKey;
 import static com.cisco.EtradeBot.Credentials.getEtradeConsumerSecret;
+import static com.cisco.EtradeBot.ETradeBot.e;
 import com.etrade.etws.account.Account;
 import com.etrade.etws.account.AccountBalanceResponse;
 import com.etrade.etws.account.AccountListResponse;
@@ -45,9 +46,15 @@ public class ETrade {
     public String oauth_consumer_secret = null;     // Your consumer secret
     public String oauth_request_token = null;       // Request token 
     public String oauth_request_token_secret = null; // Request token secret 
+    public Boolean ETradeInitialized = false;
+    public Boolean ETradeAuthenticated = false;
     
-    public void initETrade() throws IOException, ETWSException  { 
- 
+    public String initETrade(String roomId, String message, String personId) throws IOException, ETWSException  { 
+        StringBuilder obm = new StringBuilder();
+        String outboundMessage = null;
+        
+        System.out.println("Im in initEtrade");
+        
         client = OAuthClientImpl.getInstance();         // Instantiate IOAUthClient
         
         oauth_consumer_key = Credentials.getEtradeConsumerKey();
@@ -73,20 +80,75 @@ public class ETrade {
 
         String authorizeURL = null;                     // Get the URL to authorize access.
         authorizeURL = client.getAuthorizeUrl(request);
-        //System.out.println("Authorization URL is: " + authorizeURL);
         
+        System.out.println("URL is " + authorizeURL);
+        
+        //System.out.println("Authorization URL is: " + authorizeURL);
         // Launch a browser window, which will take the user to Etrade.com to get a verification code.
+        /*
         try {
-            URI uri = new java.net.URI(authorizeURL);
-            Desktop desktop = Desktop.getDesktop();
-            desktop.browse(uri);
+        URI uri = new java.net.URI(authorizeURL);
+        Desktop desktop = Desktop.getDesktop();
+        desktop.browse(uri);
         } catch (URISyntaxException ex) {
-            Logger.getLogger(ETrade.class.getName()).log(Level.SEVERE, null, ex);
+        Logger.getLogger(ETrade.class.getName()).log(Level.SEVERE, null, ex);
         }
+         */
+        obm.append("Click to securely authenticate with E*Trade to obtain a Verification Key: ").append(authorizeURL).append("  \n\n");
+        obm.append("Type *key*, then paste the verification key and hit return. (space separated).  \n");
+        obm.append("Dont worry... this is sandbox data!  No access to your real data");
+        outboundMessage = obm.toString();
+        
+        return outboundMessage;
     }
 
-    public void parseETradeKey(String message) throws IOException, ETWSException { 
-
+    public String needToInit(String roomId, String message, String personId) {
+        String outboundMessage = null;
+        
+        System.out.println("Im in needToInit");
+        
+        if (ETradeInitialized == false ) {
+            try { 
+                outboundMessage = e.initETrade(roomId, message, personId);
+                ETradeInitialized = true;
+            } catch (ETWSException ex) {
+                Logger.getLogger(ETradeBot.class.getName()).log(Level.SEVERE, null, ex);
+                outboundMessage = "Problem Initializing with ETrade...  \n";
+            } catch (IOException ie) {
+                Logger.getLogger(ETradeBot.class.getName()).log(Level.SEVERE, null, ie);
+                outboundMessage = "Problem Initializing with ETrade...  \n";
+            }        
+        }
+        
+        System.out.println("Im in needToInit " + outboundMessage);
+        return outboundMessage;
+    }
+    
+    public String needToAuth(String roomId, String message, String personId) {
+        String outboundMessage = null;
+        StringBuilder obm = new StringBuilder();
+        
+        System.out.println("Im in needToAuth");
+        
+        if (ETradeAuthenticated == false ) {
+            obm.append("Type *key*, then paste the verification key and hit return. (space separated).  \n");
+            obm.append("Dont worry... this is sandbox data!  No access to your real data  \n\n");
+            obm.append("If you dont have the secure E*Trade link anymore, type *Init ETrade*  \n");
+            outboundMessage = obm.toString();
+        }
+        
+        System.out.println("Im in needToAuth " + outboundMessage);
+        return outboundMessage;
+    }
+    
+    public String parseETradeKey(String roomId, String message, String personId) throws IOException, ETWSException { 
+        String outboundMessage = null;
+        
+        if (ETradeInitialized == false ) {
+            outboundMessage = needToInit(roomId, message, personId);
+            return outboundMessage;
+        }
+        
         // Get the verify code from the user
         // String oauth_verify_code = get_verification_code();
         String word;
@@ -112,12 +174,34 @@ public class ETrade {
 
         request.setToken(oauth_access_token);
         request.setTokenSecret(oauth_access_token_secret);
+        
+        if ((oauth_access_token != null) && (oauth_access_token_secret !=null)) {
+            outboundMessage = "Authenticated with ETrade";
+            ETradeAuthenticated = true;
+        } else {
+            outboundMessage = "Authentication FAILED with ETrade";
+        }
+        
+       
+        return outboundMessage;
 		
     }
     
-    public String showAccountList() throws IOException, ETWSException {
-        
+    public String showAccountList(String roomId, String message, String personId) throws IOException, ETWSException {
         StringBuilder obm = new StringBuilder();
+        String outboundMessage = null;
+        
+        System.out.println("Im in showAccountList");
+        
+        if (ETradeInitialized == false ) {
+            outboundMessage = needToInit(roomId, message, personId);
+            return outboundMessage;
+        }
+        if (ETradeAuthenticated == false ) {
+            outboundMessage = needToAuth(roomId, message, personId);
+            return outboundMessage;
+        }        
+        
         try { 
                 AccountsClient account_client = new AccountsClient(request);
                 AccountListResponse response = account_client.getAccountList();
@@ -128,20 +212,23 @@ public class ETrade {
                     Account a = al.next();
 
                     obm.append("===================  \n");
-                    obm.append("Account Desc: " + a.getAccountDesc() + "  \n");
-                    obm.append("Account Id: " + a.getAccountId() + "  \n");
-                    obm.append("Account Margin Level: " + a.getMarginLevel() + "  \n");
-                    obm.append("Account Value: " + a.getNetAccountValue() + "  \n");
-                    obm.append("Account Registration: " + a.getRegistrationType() + "  \n");
+                    obm.append("Account Desc: ").append(a.getAccountDesc()).append("  \n");
+                    obm.append("Account Id: ").append(a.getAccountId()).append("  \n");
+                    obm.append("Account Margin Level: ").append(a.getMarginLevel()).append("  \n");
+                    obm.append("Account Value: ").append(a.getNetAccountValue()).append("  \n");
+                    obm.append("Account Registration: ").append(a.getRegistrationType()).append("  \n");
                     obm.append("===================  \n");
                 }
         } catch (Exception e) {
         }
+        outboundMessage = obm.toString();
+        
+        System.out.println("Im in ShowAccountList " + outboundMessage);
         return obm.toString();
     }
     
 
-
+//No longer used
     public static String get_verification_code() {
         System.out.print("Enter verification code: ");
         try{
