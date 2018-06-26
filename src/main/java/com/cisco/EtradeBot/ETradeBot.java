@@ -440,10 +440,10 @@ public class ETradeBot {
                 /* Add Etrade App Specific Commands here                      */
                 /**************************************************************/
                 
-                else if (s.contains("init etrade"))  { 
+                else if (s.contains("authorize etrade"))  { 
                     
                     try { 
-                        outboundMessage = e.initETrade(roomId, s, personId);
+                        outboundMessage = e.authorizeETrade(roomId, s, personId);
                     } catch (ETWSException ex) {
                         Logger.getLogger(ETradeBot.class.getName()).log(Level.SEVERE, null, ex);
                     } catch (IOException ie) {
@@ -470,8 +470,27 @@ public class ETradeBot {
                         Logger.getLogger(ETradeBot.class.getName()).log(Level.SEVERE, null, ex);
                     } catch (IOException ie) {
                         Logger.getLogger(ETradeBot.class.getName()).log(Level.SEVERE, null, ie);
+                    }   
+                } 
+                else if (s.contains("revoke"))  { 
+                    try { 
+                        outboundMessage = e.revokeAccessToken(roomId, s, personId);
+                    } catch (ETWSException ex) {
+                        Logger.getLogger(ETradeBot.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (IOException ie) {
+                        Logger.getLogger(ETradeBot.class.getName()).log(Level.SEVERE, null, ie);
+                    }    
+                    
+                } else if (s.contains("show balances"))  { 
+                    
+                    try { 
+                        outboundMessage = e.showAccountList(roomId, s, personId);
+                    } catch (ETWSException ex) {
+                        Logger.getLogger(ETradeBot.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (IOException ie) {
+                        Logger.getLogger(ETradeBot.class.getName()).log(Level.SEVERE, null, ie);
                     }
-                
+                        
                 }
                 else {
                    obm.append("I heard you say: ").append(message.getText()).append("  \n");

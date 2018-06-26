@@ -49,12 +49,9 @@ public class ETrade {
     public Boolean ETradeInitialized = false;
     public Boolean ETradeAuthenticated = false;
     
-    public String initETrade(String roomId, String message, String personId) throws IOException, ETWSException  { 
+    public String authorizeETrade(String roomId, String message, String personId) throws IOException, ETWSException  { 
         StringBuilder obm = new StringBuilder();
         String outboundMessage = null;
-        
-        System.out.println("Im in initEtrade");
-        
         client = OAuthClientImpl.getInstance();         // Instantiate IOAUthClient
         
         oauth_consumer_key = Credentials.getEtradeConsumerKey();
@@ -71,6 +68,11 @@ public class ETrade {
         token= client.getRequestToken(request);         // Get request-token object
         oauth_request_token  = token.getToken();        // Get token string
         oauth_request_token_secret = token.getSecret(); // Get token secret
+        
+        if ((oauth_request_token != null) && (oauth_request_token_secret != null)) {
+            ETradeInitialized = true;
+            ETradeAuthenticated = false;
+        }
         
         //System.out.println ("Oauth_request_token: " + oauth_request_token);
         //System.out.println ("Oauth_request_token_secret: " + oauth_request_token_secret);
@@ -94,8 +96,8 @@ public class ETrade {
         Logger.getLogger(ETrade.class.getName()).log(Level.SEVERE, null, ex);
         }
          */
-        obm.append("Click to securely authenticate with E*Trade to obtain a Verification Key: ").append(authorizeURL).append("  \n\n");
-        obm.append("Type *key*, then paste the verification key and hit return. (space separated).  \n");
+        obm.append("Click [here](").append(authorizeURL).append (") to securely authenticate with E*Trade to obtain a Verification Key  \n\n"); ;
+        obm.append("Enter **key** followed by the verification key from E*Trade (space separated).  \n");
         obm.append("Dont worry... this is sandbox data!  No access to your real data");
         outboundMessage = obm.toString();
         
@@ -109,7 +111,7 @@ public class ETrade {
         
         if (ETradeInitialized == false ) {
             try { 
-                outboundMessage = e.initETrade(roomId, message, personId);
+                outboundMessage = e.authorizeETrade(roomId, message, personId);
                 ETradeInitialized = true;
             } catch (ETWSException ex) {
                 Logger.getLogger(ETradeBot.class.getName()).log(Level.SEVERE, null, ex);
@@ -131,9 +133,9 @@ public class ETrade {
         System.out.println("Im in needToAuth");
         
         if (ETradeAuthenticated == false ) {
-            obm.append("Type *key*, then paste the verification key and hit return. (space separated).  \n");
+            obm.append("Enter **key** followed by the verification key from E*Trade (space separated).  \n");
             obm.append("Dont worry... this is sandbox data!  No access to your real data  \n\n");
-            obm.append("If you dont have the secure E*Trade link anymore, type *Init ETrade*  \n");
+            obm.append("To regenerate another link, type **Init ETrade**  \n");
             outboundMessage = obm.toString();
         }
         
@@ -148,6 +150,11 @@ public class ETrade {
             outboundMessage = needToInit(roomId, message, personId);
             return outboundMessage;
         }
+        if (ETradeAuthenticated == true ) {
+            outboundMessage = "You are already Authenticated. Type **help**  \n";
+            return outboundMessage;
+        }
+        
         
         // Get the verify code from the user
         // String oauth_verify_code = get_verification_code();
@@ -165,26 +172,55 @@ public class ETrade {
         
         request.setVerifierCode(oauth_verify_code.toUpperCase());
         
-        token = client.getAccessToken(request);
-        String oauth_access_token = token.getToken();
-        String oauth_access_token_secret = token.getSecret();
+        String oauth_access_token = null;
+        String oauth_access_token_secret = null;
         
+        try {
+            token = client.getAccessToken(request);
+            oauth_access_token = token.getToken();
+            oauth_access_token_secret = token.getSecret();
+        } catch (Exception e) {
+            Logger.getLogger(ETradeBot.class.getName()).log(Level.SEVERE, null, e);
+            System.out.println("Got snagged in the catch");
+            ETradeInitialized = false;
+        }
+    
         System.out.println("oauth access token " + oauth_access_token);
         System.out.println("oauth_access_secret " + oauth_access_token_secret);
-
-        request.setToken(oauth_access_token);
-        request.setTokenSecret(oauth_access_token_secret);
         
         if ((oauth_access_token != null) && (oauth_access_token_secret !=null)) {
-            outboundMessage = "Authenticated with ETrade";
+            request.setToken(oauth_access_token);
+            request.setTokenSecret(oauth_access_token_secret);
+            outboundMessage = "Authenticated with ETrade. Session will end at midnight US Eastern Time, or after 2 hours of no activity.";
             ETradeAuthenticated = true;
         } else {
             outboundMessage = "Authentication FAILED with ETrade";
+            ETradeInitialized = false;
         }
-        
        
         return outboundMessage;
 		
+    }
+    
+    public String revokeAccessToken (String roomId, String message, String personId) throws IOException, ETWSException {
+    
+       String outboundMessage = null;
+        try {
+            client.revokeAccessToken(request);
+            // oauth_access_token = token.getToken();
+            // oauth_access_token_secret = token.getSecret();
+            
+            ETradeInitialized = false;
+            ETradeAuthenticated = false;
+            outboundMessage = "Any prior Etrade Authentication for this session has been revoked. You must re-authenticate to continue.";
+            
+        } catch (ETWSException e) {
+            outboundMessage = "Hmmm, doesnt look like there was anything to revoke.";
+            Logger.getLogger(ETradeBot.class.getName()).log(Level.SEVERE, null, e);
+        } catch (IOException eio) {  
+            Logger.getLogger(ETradeBot.class.getName()).log(Level.SEVERE, null, eio);
+        }
+       return outboundMessage;
     }
     
     public String showAccountList(String roomId, String message, String personId) throws IOException, ETWSException {
