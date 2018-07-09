@@ -113,21 +113,20 @@ public class ETradeBot {
      */
     public static String help() {
         return "Try any of the following...  \n" +
-                "-- show **portfolio** [** all | description | function | pillar | sponsor | pm | biz lead | it lead | last update | health | color | archive** ]  \n" +
-                "-- show **portfolio** status [** without updates | red | yellow | green **]  \n" +   
-                "-- show [** all | description | function | pillar | sponsor | pm | biz lead | it lead | last update | health | color | archive** ] **program** &lt; portion of program name&gt;  \n" +
-                " Note, Archived programs will not be shown by default.  They will be shown if explicitly mentioned.  \n\n" +
-                "You can also access your own smartsheets:  \n" +
-                "-- show **folders**  \n" +
-                "-- show **workspaces**  \n" +
-                "-- show **sheets** [**id**]   \n" +
-                "-- show **columns** [**sheet** <sheetname>]  \n" +
-                "-- **search** &lt;data&gt;  \n" +
-                "-- **set-token** &lt;smartsheet token&gt;.  " +
-                " To get a token, log into smartsheet, then go to  \n" +
-                " Account -> Personal Settings -> API Access, and generate" +
-                " an access token.  Enter it using the **set-token** command.  \n\n" +
-                " Admins can also type **admin help** for a list of additional commands";
+                "**Show Accounts** - Displays account names and attributes.  \n" +
+                "**Show Balances** - Displays account balances and attributes.  \n" +
+                "**List Alerts** - Displays a summary list of alerts.  \n" +
+                "**Read Alert <number>** - Displays details for an alert.  \n" +
+                "**Delete Alert <number>** - Deletes an alert.  \n\n" +
+                "Note: Any Etrade commands will automatically initiate authentication.  \n" +
+                "**Authorize Etrade** - Initiates authentication sequence.  \n" +
+                "**Key <verification key>** - Sets the verification key to complet authentication.   \n" +
+                "**Revoke** - Revokes the authentication key for this session.   \n" +
+                "**Help** or **Hello** - Displays this message.   \n" +
+                "**Support** - Shows how to get support.   \n" +
+                "**Privacy** - Explains information the BOT retains.   \n" +
+                "  \n\n" +
+                "Admins can also type **Admin help** for a list of additional commands.";
 
 
     }
@@ -148,8 +147,6 @@ public class ETradeBot {
     public static String adminHelp() {
         return "Admin help - Lists commands for bot admins.  \n" 
                 + "- Admin help - Guidance for Bot admins  \n" 
-                + "- Hello - Returns the help message  \n"
-                + "- Support - returns the person responsible for this app  \n"
                 + "- List rooms - List rooms that this bot is used in  \n"
                 + "- Create webhook [&lt;url&gt;]- Create a webhook  \n"                
                 + "- List webhooks - List registered webhooks  \n"
@@ -462,7 +459,7 @@ public class ETradeBot {
                     }
                 
                 }
-                else if (s.contains("show accounts"))  { 
+                else if (s.contains("account"))  { 
                     
                     try { 
                         outboundMessage = e.showAccountList(roomId, s, personId);
@@ -481,27 +478,56 @@ public class ETradeBot {
                         Logger.getLogger(ETradeBot.class.getName()).log(Level.SEVERE, null, ie);
                     }    
                     
-                } else if (s.contains("show balances"))  { 
+                } else if (s.contains("balance"))  { 
                     
                     try { 
-                        outboundMessage = e.showAccountList(roomId, s, personId);
+                        outboundMessage = e.showBalances(roomId, s, personId);
                     } catch (ETWSException ex) {
                         Logger.getLogger(ETradeBot.class.getName()).log(Level.SEVERE, null, ex);
                     } catch (IOException ie) {
                         Logger.getLogger(ETradeBot.class.getName()).log(Level.SEVERE, null, ie);
                     }
                         
-                }
-                else {
+                } else if (s.contains("position"))  { 
+                    
+                    try { 
+                        outboundMessage = e.showPositions(roomId, s, personId);
+                    } catch (ETWSException ex) {
+                        Logger.getLogger(ETradeBot.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (IOException ie) {
+                        Logger.getLogger(ETradeBot.class.getName()).log(Level.SEVERE, null, ie);
+                    }
+                } else if (s.contains("read alert"))  { 
+                    
+                    try { 
+                        outboundMessage = e.readAlerts(roomId, s, personId);
+                    } catch (ETWSException ex) {
+                        Logger.getLogger(ETradeBot.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (IOException ie) {
+                        Logger.getLogger(ETradeBot.class.getName()).log(Level.SEVERE, null, ie);
+                    }
+                     
+                } else if (s.contains("list alerts"))  { 
+                    
+                    try { 
+                        outboundMessage = e.listAlerts(roomId, s, personId);
+                    } catch (ETWSException ex) {
+                        Logger.getLogger(ETradeBot.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (IOException ie) {
+                        Logger.getLogger(ETradeBot.class.getName()).log(Level.SEVERE, null, ie);
+                    }
+                           
+                } else {
                    obm.append("I heard you say: ").append(message.getText()).append("  \n");
                    obm.append("Not really sure what to do with that.  \n\n");
                    obm.append(help());
                    outboundMessage = obm.toString();
                 }
-            } else {
+                
+                /* {
                 obm.append("This bot only responds to users with email in the ").append(Credentials.getEmailDomain()).append(" domain.");
                 outboundMessage = obm.toString();
-                    
+                }  */   
             }
             
             // Send the resulting message back to the user!

@@ -11,7 +11,19 @@ import static com.cisco.EtradeBot.ETradeBot.e;
 import com.etrade.etws.account.Account;
 import com.etrade.etws.account.AccountBalanceResponse;
 import com.etrade.etws.account.AccountListResponse;
+import com.etrade.etws.account.AccountPosition;
+import com.etrade.etws.account.AccountPositionsRequest;
 import com.etrade.etws.account.AccountPositionsResponse;
+import com.etrade.etws.account.Alert;
+import com.etrade.etws.account.Balance;
+import com.etrade.etws.account.CashAccountBalance;
+import com.etrade.etws.account.GetAlertDetailsResponse;
+import com.etrade.etws.account.GetAlertsResponse;
+import com.etrade.etws.account.MarginAccountBalance;
+import com.etrade.etws.account.MarginLevel;
+import static com.etrade.etws.account.SecurityTypeEnum.EQ;
+import static com.etrade.etws.account.SecurityTypeEnum.MF;
+import static com.etrade.etws.account.SecurityTypeEnum.OPTN;
 import com.etrade.etws.oauth.sdk.client.IOAuthClient;
 import com.etrade.etws.oauth.sdk.client.OAuthClientImpl;
 import com.etrade.etws.oauth.sdk.common.Token;
@@ -25,8 +37,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.text.NumberFormat;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -48,6 +62,8 @@ public class ETrade {
     public String oauth_request_token_secret = null; // Request token secret 
     public Boolean ETradeInitialized = false;
     public Boolean ETradeAuthenticated = false;
+    
+    NumberFormat format = NumberFormat.getCurrencyInstance(Locale.US);
     
     public String authorizeETrade(String roomId, String message, String personId) throws IOException, ETWSException  { 
         StringBuilder obm = new StringBuilder();
@@ -255,7 +271,11 @@ public class ETrade {
                     obm.append("Account Registration: ").append(a.getRegistrationType()).append("  \n");
                     obm.append("===================  \n");
                 }
-        } catch (Exception e) {
+        } catch (ETWSException e) {
+            outboundMessage = "Hmmm, had trouble getting the Account information.";
+            Logger.getLogger(ETradeBot.class.getName()).log(Level.SEVERE, null, e);
+        } catch (IOException eio) {  
+            Logger.getLogger(ETradeBot.class.getName()).log(Level.SEVERE, null, eio);
         }
         outboundMessage = obm.toString();
         
@@ -263,8 +283,238 @@ public class ETrade {
         return obm.toString();
     }
     
+    public String showBalances(String roomId, String message, String personId) throws IOException, ETWSException {
+        StringBuilder obm = new StringBuilder();
+        String outboundMessage = null;
+        
+        System.out.println("Im in ShowBalances");
+        
+        if (ETradeInitialized == false ) {
+            outboundMessage = needToInit(roomId, message, personId);
+            return outboundMessage;
+        }
+        if (ETradeAuthenticated == false ) {
+            outboundMessage = needToAuth(roomId, message, personId);
+            return outboundMessage;
+        }        
+        
+        try { 
+            
+                AccountsClient account_client = new AccountsClient(request);
+                AccountListResponse response = account_client.getAccountList();
 
-//No longer used
+                List<Account> alist = response.getResponse();
+                Iterator<Account> al = alist.iterator();
+                while (al.hasNext()) {
+                    Account a = al.next();
+
+                    obm.append("===================  \n");
+                    AccountBalanceResponse balance = account_client.getAccountBalance(a.getAccountId());
+                    obm.append("Account Id: ").append(balance.getAccountId()).append("  \n");
+                    obm.append("Account Type: ").append(balance.getAccountType()).append("  \n");
+                    obm.append("Account Option Level: ").append(balance.getOptionLevel()).append("  \n");
+                    
+                    
+                    Balance b = balance.getAccountBalance();
+                    obm.append("Cash Available for Withdrawal: ").append(b.getCashAvailableForWithdrawal().toString()).append("  \n");
+                    
+                    /*
+                    obm.append("Cash Call: ").append(b.getTotalCash().toString()).append("  \n"); 
+                    obm.append("Funds Witheld from Purchase Power: ").append(b.getFundsWithheldFromPurchasePower().toString()).append("  \n");
+                    obm.append("Funds Witheld from Withdrawal: ").append(b.getFundsWithheldFromWithdrawal().toString()).append("  \n");                   
+                    */
+                    
+                    if (balance.getAccountType() == MarginLevel.CASH) { 
+                        CashAccountBalance cab = balance.getCashAccountBalance();
+                        obm.append("Cash Available for Investment ").append(cab.getCashAvailableForInvestment().toString()).append("  \n"); 
+                        obm.append("Cash Balance ").append(cab.getCashBalance().toString()).append("  \n"); 
+                        //obm.append("Cash Settled for Investment ").append(cab.getSettledCashForInvestment().toString()).append("  \n"); 
+                        //obm.append("Cash Unsettled for Investment ").append(cab.getUnSettledCashForInvestment().toString()).append("  \n"); 
+                    }
+                    
+                    if (balance.getAccountType() == MarginLevel.MARGIN) { 
+                        MarginAccountBalance mab = balance.getMarginAccountBalance();
+                        obm.append("Margin Balance ").append(mab.getMarginBalance().toString()).append("  \n"); 
+                    }
+ 
+                    //obm.append("Cash Available for Investment: ").append(cab.getCashAvailableForInvestment().toString()).append("  \n");
+                    //obm.append("Cash Balance: ").append(cab.getCashBalance().toString()).append("  \n");
+                    //obm.append("Cash Settled for Investment: ").append(cab.getSettledCashForInvestment().toString()).append("  \n");
+                    //obm.append("Cash Unsettled for Investment: ").append(cab.getUnSettledCashForInvestment().toString()).append("  \n");
+
+                     
+                    obm.append("===================  \n");
+                }
+        } catch (ETWSException e) {
+            outboundMessage = "Hmmm, had trouble getting the Balance information.";
+            Logger.getLogger(ETradeBot.class.getName()).log(Level.SEVERE, null, e);
+        } catch (IOException eio) {  
+            Logger.getLogger(ETradeBot.class.getName()).log(Level.SEVERE, null, eio);
+        }
+        
+        outboundMessage = obm.toString();
+        return obm.toString();
+    }
+    
+    public String showPositions(String roomId, String message, String personId) throws IOException, ETWSException {
+        StringBuilder obm = new StringBuilder();
+        String outboundMessage = null;
+
+        System.out.println("Im in ShowPositions");
+
+        if (ETradeInitialized == false ) {
+            outboundMessage = needToInit(roomId, message, personId);
+            return outboundMessage;
+        }
+        if (ETradeAuthenticated == false ) {
+            outboundMessage = needToAuth(roomId, message, personId);
+            return outboundMessage;
+        }        
+
+        try { 
+
+                AccountsClient account_client = new AccountsClient(request);
+                AccountListResponse response = account_client.getAccountList();
+
+                List<Account> alist = response.getResponse();
+                Iterator<Account> al = alist.iterator();
+
+                while (al.hasNext()) {
+                    Account a = al.next();
+                    String accountId = a.getAccountId();
+
+
+                    AccountPositionsResponse aprs = null;
+                    AccountPositionsRequest apr = new AccountPositionsRequest();
+
+                    apr.setCount("10");
+                    //apr.setMarker("Your marker value");
+                    //apr.setSymbol("Your symbol");
+                    //apr.setTypeCode("Your type code"); // EQ, OPTN, MF, BOND
+                    aprs = account_client.getAccountPositions(accountId,apr);
+
+                    obm.append("===================  \n");
+                    obm.append("Account ID: ").append(aprs.getAccountId()).append("  \n");
+                    obm.append("===================  \n");                   
+                    List<AccountPosition> l = aprs.getResponse();
+                    Iterator<AccountPosition> api = l.iterator();
+
+                    while (api.hasNext()) {
+                        AccountPosition ap = api.next();
+                        obm.append("Position: ").append(ap.getProductId().getSymbol()).append(", Qty: ").append(ap.getQty().toString());
+                        obm.append(", Current Price: ").append(format.format(ap.getCurrentPrice())).append(", Market Value: ").append(format.format(ap.getMarketValue())).append("  \n");
+                    }
+
+                    obm.append("===================  \n\n");
+                }
+        } catch (ETWSException e) {
+            outboundMessage = "Hmmm, had trouble getting the Balance information.";
+            Logger.getLogger(ETradeBot.class.getName()).log(Level.SEVERE, null, e);
+        } catch (IOException eio) {  
+            Logger.getLogger(ETradeBot.class.getName()).log(Level.SEVERE, null, eio);
+        }
+
+        outboundMessage = obm.toString();
+        return obm.toString();
+    }
+
+    public String listAlerts(String roomId, String message, String personId) throws IOException, ETWSException {
+        StringBuilder obm = new StringBuilder();
+        String outboundMessage = null;
+
+        System.out.println("Im in ListAlerts");
+
+        if (ETradeInitialized == false ) {
+            outboundMessage = needToInit(roomId, message, personId);
+            return outboundMessage;
+        }
+        if (ETradeAuthenticated == false ) {
+            outboundMessage = needToAuth(roomId, message, personId);
+            return outboundMessage;
+        }        
+
+        try { 
+            AccountsClient account_client = new AccountsClient(request);
+            GetAlertsResponse alertResponse = account_client.getAlerts();
+
+            List<Alert> alertList = alertResponse.getResponse();
+            Iterator<Alert> lert = alertList.iterator();
+
+            obm.append("===================  \n");
+            obm.append("Account Alerts").append("  \n");
+
+            while (lert.hasNext()) {
+                Alert a = lert.next();
+                obm.append("Alert Id: ").append(a.getAlertId());
+                obm.append(", Subject: ").append(a.getSubject()).append(", Symbol: ").append("  \n");
+            }
+            obm.append("===================  \n\n");
+        
+        } catch (ETWSException e4) {
+            outboundMessage = "Hmmm, had trouble getting the Alert information.";
+            Logger.getLogger(ETradeBot.class.getName()).log(Level.SEVERE, null, e4);
+        } catch (IOException eio4) {  
+            Logger.getLogger(ETradeBot.class.getName()).log(Level.SEVERE, null, eio4);
+        }
+        outboundMessage = obm.toString();
+        return obm.toString();
+    }    
+   
+    public String readAlerts(String roomId, String message, String personId) throws IOException, ETWSException {
+        StringBuilder obm = new StringBuilder();
+        String outboundMessage = null;
+
+        System.out.println("Im in ReadAlerts");
+
+        if (ETradeInitialized == false ) {
+            outboundMessage = needToInit(roomId, message, personId);
+            return outboundMessage;
+        }
+        if (ETradeAuthenticated == false ) {
+            outboundMessage = needToAuth(roomId, message, personId);
+            return outboundMessage;
+        }        
+        
+        StringTokenizer st = new StringTokenizer(message);
+        String alert = null;
+        Boolean found = false;
+        
+        while (st.hasMoreTokens()) {
+            alert = st.nextToken();
+            if (alert.equals("alerts") || alert.equals("alert")) {
+                found = true;
+                alert = st.nextToken();
+                if (alert == "") {
+                  obm.append("You must include an alert number. Try **list alerts** to get the numbers.  \n\n");  
+                }
+            }
+           
+            if (found == true) {
+            
+                try {     
+                    AccountsClient account_client = new AccountsClient(request);
+                    System.out.println("Alert #: " + alert);
+                    GetAlertDetailsResponse alertDetails = account_client.getAlertDetail(Long.valueOf(alert));
+
+                    obm.append("===================  \n");
+                    obm.append("Alert Subject: ").append(alertDetails.getSubject()).append(", ID: ").append(alertDetails.getAlertId()).append("  \n");
+                    obm.append("Alert Message: ").append(alertDetails.getMsgText()).append("  \n\n");
+                    obm.append("===================  \n\n");
+
+                } catch (ETWSException e5) {
+                    outboundMessage = "Hmmm, had trouble getting the Alert information.";
+                    Logger.getLogger(ETradeBot.class.getName()).log(Level.SEVERE, null, e5);
+                } catch (IOException eio5) {  
+                    Logger.getLogger(ETradeBot.class.getName()).log(Level.SEVERE, null, eio5);
+                }
+            }
+        }
+        
+        outboundMessage = obm.toString();
+        return obm.toString();
+    }      
+    
+/*No longer used
     public static String get_verification_code() {
         System.out.print("Enter verification code: ");
         try{
@@ -281,5 +531,6 @@ public class ETrade {
         }
    
     }
+*/
     
 }
