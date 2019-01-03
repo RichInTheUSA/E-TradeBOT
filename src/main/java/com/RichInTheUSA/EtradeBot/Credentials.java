@@ -1,7 +1,11 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright 2019, Rich Verjinski
+ *
+ * The Credentials class is used to store any type of credentials needed 
+ * to operate the BOT or to integrate into any backend systems.
+ *
+ * Actual Keys are stored as environment variables, which are passed to the
+ * runtime system.  This way, we are not hardcoding any sensitive information.
  */
 package com.RichInTheUSA.EtradeBot;
 
@@ -12,9 +16,11 @@ package com.RichInTheUSA.EtradeBot;
 public class Credentials {
     
     /**
-     *  This the person Id of the Cisco Webex Spaces bot. When creating a new bot, I generally
-     *  receive this via the API, and then capture it here.  It's used so that
-     *  the bot does not respond to questions from itself (which can cause an infinite loop).
+     *  The Person ID of the bot is a string of characters that uniquely
+     *  identifies the BOT.  Messages from the BOT are filtered out, so that
+     *  the BOT does not respond to it's own messages.
+     * 
+     *  The Person ID string should be stored in the BOTPID environment variable
      */
     
     public static String getMyPersonId() {
@@ -26,7 +32,7 @@ public class Credentials {
     }
 
     /**
-     *  This is a secret key that's been assigned to the Cisco Webex Spaces bot.  Each bot will have one.
+     *  The Access Token is a secret key that's been assigned to the Cisco Webex Spaces bot.  Each bot will have one.
      *  If you want to create a new bot, then get a new key at https://developer.ciscospark.com/apps.html
      *  
      * For security reasons, the accessToken is passed as an Environment variable called AT, 
@@ -41,11 +47,24 @@ public class Credentials {
         return at;
     }
     
+    /**
+     * 
+     * This is the port number that the Apache Spark server will listen on.
+     * The specific number is stored as an Environment Variable which 
+     * is read at run time.
+     */
+    
     public static int getApacheSparkPort() {
         String ApachePort = System.getenv().get("BOTPORT");
         int p = Integer.parseInt(ApachePort);
         return p;
     }   
+    
+    /**
+     * The webhook URL can be configured manually at the Webex.cisco.com website,
+     * OR you can enter it here, and then issues the command "createwebhook" to
+     * the server... and this software will register the webhook for you.
+     */
     
     private static final String myWebhook = "http://0.tcp.ngrok.io:12609/webhook";
     
@@ -53,11 +72,21 @@ public class Credentials {
         return myWebhook;
     }
      
+    /**
+     *  In some cases, you may want to restrict the users of a BOT to a particular
+     *  Enterprise. Messages received can be filtered when appropriate.
+     */
     private static final String emailDomain = "@verizon.net";
     public static String getEmailDomain() {
         return emailDomain;
     }
     
+    
+    /**
+     * Consumer Key and Secrets are used as part of the E*Trade
+     * authentication mechanism.   Each is a string that is stored as an environment
+     * variable to prevent sensitive data from being stored here.
+     */
     public static String getEtradeConsumerKey() {
         String at = System.getenv().get("ETCK");
         if ( at == null) {

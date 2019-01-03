@@ -1,9 +1,16 @@
 /*
- * This file defines the Apache Spark server requests
- * and then invokes respective 
+ * Big Picture:   This BOT is based on the Apache Spark server, which is
+ * used to receive notifications from the variuos APIs.  This file defines
+ * the various messages that the server can handle, and then kicks off other
+ * java methods to act on the requests.
+ *
+ * Copyright 2019, Rich Verjinski
  */
 package com.RichInTheUSA.EtradeBot;
 
+/**
+ * Imports
+ */
 import java.io.StringReader;
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -17,7 +24,13 @@ import static spark.Spark.post;
 
 
 /**
- *
+ * ApacheSpak Class
+ * 
+ * For each of the messages that the BOT can receive, this file specifies 
+ * the response to send back to the client, as well as the java method
+ * to call to process the request.
+ 
+ * 
  * @author Rich Verjinski
  */
 public class ApacheSpark {
@@ -27,9 +40,12 @@ public class ApacheSpark {
      */
     public ApacheSpark() {
         
+      // Get the port number that the server should listen on and set it.
       int p = Credentials.getApacheSparkPort();
       port(p); 
     
+      // The following are commands which can be issued to the web server.
+      
       get("/help", (Request request, Response response) -> {
           response.status(200);
           return ("EtradeBot.help()");
@@ -85,7 +101,11 @@ public class ApacheSpark {
         response.status(200);
         return ETradeBot.getMessages();
       });
-        
+     
+    // Messages from the Cisco Webex Server come as a POST with the keyword
+    // webhook and a message body in JSON format.
+    // This code calls processMessages to take action.
+      
     post("/webhook", (Request request, Response response) -> {
         response.status(200); 
         

@@ -1,13 +1,11 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+/**
+ * Copyright 2019, Rich Verjinski
+ * 
  */
 package com.RichInTheUSA.EtradeBot;
 
-import static com.RichInTheUSA.EtradeBot.Credentials.getEtradeConsumerKey;
-import static com.RichInTheUSA.EtradeBot.Credentials.getEtradeConsumerSecret;
 import static com.RichInTheUSA.EtradeBot.ETradeBot.e;
+
 import com.etrade.etws.account.Account;
 import com.etrade.etws.account.AccountBalanceResponse;
 import com.etrade.etws.account.AccountListResponse;
@@ -21,9 +19,6 @@ import com.etrade.etws.account.GetAlertDetailsResponse;
 import com.etrade.etws.account.GetAlertsResponse;
 import com.etrade.etws.account.MarginAccountBalance;
 import com.etrade.etws.account.MarginLevel;
-import static com.etrade.etws.account.SecurityTypeEnum.EQ;
-import static com.etrade.etws.account.SecurityTypeEnum.MF;
-import static com.etrade.etws.account.SecurityTypeEnum.OPTN;
 import com.etrade.etws.oauth.sdk.client.IOAuthClient;
 import com.etrade.etws.oauth.sdk.client.OAuthClientImpl;
 import com.etrade.etws.oauth.sdk.common.Token;
@@ -31,12 +26,8 @@ import com.etrade.etws.sdk.client.AccountsClient;
 import com.etrade.etws.sdk.client.ClientRequest;
 import com.etrade.etws.sdk.client.Environment;
 import com.etrade.etws.sdk.common.ETWSException;
-import java.awt.Desktop;
-import java.io.BufferedReader;
+
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.text.NumberFormat;
 import java.util.Iterator;
 import java.util.List;
@@ -44,21 +35,24 @@ import java.util.Locale;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apache.commons.httpclient.contrib.ssl.*;
 
 
 /**
  *
  * @author richverjinski
+ * 
+ * This is the heart of the ETrade BOT.  It contains the code to manage the state
+ * of a two phase authentication system, as well as the code to parse data received
+ * from Etrade and then format it to send back to the BOT user.
  */
 public class ETrade {
 
     public IOAuthClient client = null;
     public ClientRequest request = null;
     public Token token = null;
-    public String oauth_consumer_key = null;        // Your consumer key
-    public String oauth_consumer_secret = null;     // Your consumer secret
-    public String oauth_request_token = null;       // Request token 
+    public String oauth_consumer_key = null;         // Your consumer key
+    public String oauth_consumer_secret = null;      // Your consumer secret
+    public String oauth_request_token = null;        // Request token 
     public String oauth_request_token_secret = null; // Request token secret 
     public Boolean ETradeInitialized = false;
     public Boolean ETradeAuthenticated = false;
@@ -72,8 +66,6 @@ public class ETrade {
         
         oauth_consumer_key = Credentials.getEtradeConsumerKey();
         oauth_consumer_secret = Credentials.getEtradeConsumerSecret();
-        //System.out.println ("Consumer key: " + oauth_consumer_key);
-        //System.out.println ("Consumer secret: " + oauth_consumer_secret);
         
         request = new ClientRequest();                  // Instantiate ClientRequest
         request.setEnv(Environment.SANDBOX);            // Use sandbox environment
@@ -90,9 +82,6 @@ public class ETrade {
             ETradeAuthenticated = false;
         }
         
-        //System.out.println ("Oauth_request_token: " + oauth_request_token);
-        //System.out.println ("Oauth_request_token_secret: " + oauth_request_token_secret);
-        
         request.setToken(oauth_request_token);          // Now that we have the token, use it in our requests.
         request.setTokenSecret(oauth_request_token_secret);
 
@@ -101,17 +90,6 @@ public class ETrade {
         
         System.out.println("URL is " + authorizeURL);
         
-        //System.out.println("Authorization URL is: " + authorizeURL);
-        // Launch a browser window, which will take the user to Etrade.com to get a verification code.
-        /*
-        try {
-        URI uri = new java.net.URI(authorizeURL);
-        Desktop desktop = Desktop.getDesktop();
-        desktop.browse(uri);
-        } catch (URISyntaxException ex) {
-        Logger.getLogger(ETrade.class.getName()).log(Level.SEVERE, null, ex);
-        }
-         */
         obm.append("Click [here](").append(authorizeURL).append (") to securely authenticate with E*Trade to obtain a Verification Key  \n\n"); ;
         obm.append("Enter **key** followed by the verification key from E*Trade (space separated).  \n");
         obm.append("Dont worry... this is sandbox data!  No access to your real data");

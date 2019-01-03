@@ -1,7 +1,6 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright 2019, Rich Verjinski
+ *
  */
 package com.RichInTheUSA.EtradeBot;
 
@@ -339,7 +338,7 @@ public class ETradeBot {
     /**
      * Process Messages -  This is the method that is kicked off when a webhook
      * is received by the Apache Spark server. The apache server then calls 
-     * this method to parse the message.
+     * this method to parse the message!!
      * @param roomId  - The room that the message came from, so that bot can respond.
      * @param messageId - The message Id so that the message can be parsed.
      * @param personId - The person Id who sent the message.
