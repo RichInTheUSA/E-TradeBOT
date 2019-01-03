@@ -115,16 +115,17 @@ public class ETradeBot {
         return "Try any of the following...  \n" +
                 "**Show Accounts** - Displays account names and attributes.  \n" +
                 "**Show Balances** - Displays account balances and attributes.  \n" +
+                "**Show Positions** - Displays account positions.  \n" +
                 "**List Alerts** - Displays a summary list of alerts.  \n" +
-                "**Read Alert <number>** - Displays details for an alert.  \n" +
-                "**Delete Alert <number>** - Deletes an alert.  \n\n" +
-                "Note: Any Etrade commands will automatically initiate authentication.  \n" +
-                "**Authorize Etrade** - Initiates authentication sequence.  \n" +
-                "**Key <verification key>** - Sets the verification key to complet authentication.   \n" +
+                "**Read Alert 'number'** - Displays details for an alert.  \n" +
+                "**Delete Alert 'number'** - Deletes an alert.  \n\n" +
+                "Note: Any Etrade commands will automatically initiate authentication / authorization sequence.  \n" +
+                "**Authorize Etrade** - Initiates authentication / authorization sequence.  \n" +
+                "**Key 'verification key'** - Sets the verification key to complet authentication.   \n" +
                 "**Revoke** - Revokes the authentication key for this session.   \n" +
                 "**Help** or **Hello** - Displays this message.   \n" +
                 "**Support** - Shows how to get support.   \n" +
-                "**Privacy** - Explains information the BOT retains.   \n" +
+                "**Privacy** - Privacy statement.   \n" +
                 "  \n\n" +
                 "Admins can also type **Admin help** for a list of additional commands.";
 
@@ -164,7 +165,7 @@ public class ETradeBot {
      * @return
      */
     public static String support() {
-        return "Rich Verjinski, rverjins@cisco.com  \n";
+        return "Rich Verjinski, rich.verjinski1@verizon.net  \n";
     }
     
     /**
@@ -172,8 +173,8 @@ public class ETradeBot {
      * @return String
      */
     public static String privacy() {
-        return "This should tell the user how the data is being used (or not used).  \n" +
-               "the support page should have a privacy statement";
+        return "This BOT does not retain any private information or account data,  \n" +
+               "In fact, it accesses SAMPLE account information only.  \n";
     }
     
     /**
@@ -367,10 +368,12 @@ public class ETradeBot {
         } else {
             
             Message message = spark.messages().path("/"+ messageId, Message.class).get();
-            System.out.println("\nReceived from : " + message.getPersonEmail());
+            System.out.println("\nReceived from : " + message.getPersonEmail()+ " " + personId);
             
             // Check to see if the user is in the correct domain.
-            if ( message.getPersonEmail().contains(Credentials.getEmailDomain()) ) { 
+            // Don't need to do this for Etrade Bot
+            // if ( message.getPersonEmail().contains(Credentials.getEmailDomain()) ) { 
+            
                 System.out.println("Received: " + message.getText());
 
                 // Convert the message to all lower case... it's a lot easier to parse.
@@ -524,11 +527,12 @@ public class ETradeBot {
                    outboundMessage = obm.toString();
                 }
                 
-                /* {
+            /*  {
                 obm.append("This bot only responds to users with email in the ").append(Credentials.getEmailDomain()).append(" domain.");
                 outboundMessage = obm.toString();
-                }  */   
-            }
+                }    */
+            
+            // }
             
             // Send the resulting message back to the user!
             ETradeBot.sendMessage( roomId, outboundMessage, personId);

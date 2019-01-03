@@ -17,6 +17,9 @@ public class Credentials {
      *  the bot does not respond to questions from itself (which can cause an infinite loop).
      */
     
+    // Y2lzY29zcGFyazovL3VzL1BFT1BMRS81N2I3YTBmNy0xNmM1LTQzMDgtYjE3YS02YzcyMWJmNmJlNzU
+    // Webex PID:  Y2lzY29zcGFyazovL3VzL0FQUExJQ0FUSU9OLzU3YjdhMGY3LTE2YzUtNDMwOC1iMTdhLTZjNzIxYmY2YmU3NQ
+    
     public static String getMyPersonId() {
         String myPersonId = System.getenv().get("BOTPID");
         if ( myPersonId == null) {
@@ -55,13 +58,13 @@ public class Credentials {
         return p;
     }   
     
-    private static final String myWebhook = "http://19d86c7d.ngrok.io/webhook";
+    private static final String myWebhook = "http://0.tcp.ngrok.io:14876/webhook";
     
     public static String getMyWebhook() {
         return myWebhook;
     }
      
-    private static final String emailDomain = "@cisco.com";
+    private static final String emailDomain = "@verizon.net";
     public static String getEmailDomain() {
         return emailDomain;
     }

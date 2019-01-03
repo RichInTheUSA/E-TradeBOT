@@ -512,25 +512,5 @@ public class ETrade {
         
         outboundMessage = obm.toString();
         return obm.toString();
-    }      
-    
-/*No longer used
-    public static String get_verification_code() {
-        System.out.print("Enter verification code: ");
-        try{
-            BufferedReader br =
-            new BufferedReader(new InputStreamReader(System.in));
-
-            String input;
-
-            input=br.readLine();
-            return input;
-        }catch(IOException io){
-            io.printStackTrace();
-            return "";
-        }
-   
-    }
-*/
-    
+    }         
 }
