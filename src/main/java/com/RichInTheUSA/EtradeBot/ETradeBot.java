@@ -3,16 +3,13 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.cisco.EtradeBot;
+package com.RichInTheUSA.EtradeBot;
 
-
-import static com.cisco.EtradeBot.SmartSheet.processSmartSheetRequest;
 import com.ciscospark.Message;
 import com.ciscospark.Spark;
 import com.ciscospark.Webhook;
 import com.ciscospark.Person;
 import com.etrade.etws.sdk.common.ETWSException;
-import com.smartsheet.api.SmartsheetException;
 import java.io.IOException;
 
 import java.net.MalformedURLException;
@@ -73,16 +70,7 @@ public class ETradeBot {
         //This section initializes the bot.
         System.out.println("Start Initializing");
         
-        // Initialize SmartSheet API
-        /*
-        try {
-            SmartSheet.initializeSmartSheetAPI();
-        } catch (SmartsheetException ex) {
-            Logger.getLogger(ETradeBot.class.getName()).log(Level.SEVERE, null, ex);
-        }  
-        System.out.println("... Initializing SmartSheet API");
-      
-        */
+       
         // Initialize Cisco Spark API
         spark = Spark.builder()
         .baseUrl(URI.create("https://api.ciscospark.com/v1"))

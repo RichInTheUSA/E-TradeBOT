@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.cisco.EtradeBot;
+package com.RichInTheUSA.EtradeBot;
 
 /**
  *
@@ -16,9 +16,6 @@ public class Credentials {
      *  receive this via the API, and then capture it here.  It's used so that
      *  the bot does not respond to questions from itself (which can cause an infinite loop).
      */
-    
-    // Y2lzY29zcGFyazovL3VzL1BFT1BMRS81N2I3YTBmNy0xNmM1LTQzMDgtYjE3YS02YzcyMWJmNmJlNzU
-    // Webex PID:  Y2lzY29zcGFyazovL3VzL0FQUExJQ0FUSU9OLzU3YjdhMGY3LTE2YzUtNDMwOC1iMTdhLTZjNzIxYmY2YmU3NQ
     
     public static String getMyPersonId() {
         String myPersonId = System.getenv().get("BOTPID");
@@ -43,14 +40,6 @@ public class Credentials {
         }
         return at;
     }
- 
-    public static String getMySSToken() {
-        String SST = System.getenv().get("SST");
-        if ( SST == null) {
-            SST = "Unknown SmartSheet Token";
-        }
-        return SST;
-    }           
     
     public static int getApacheSparkPort() {
         String ApachePort = System.getenv().get("BOTPORT");

@@ -2,7 +2,7 @@
  * This file defines the Apache Spark server requests
  * and then invokes respective 
  */
-package com.cisco.EtradeBot;
+package com.RichInTheUSA.EtradeBot;
 
 import java.io.StringReader;
 import javax.json.Json;

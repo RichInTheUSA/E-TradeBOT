@@ -3,11 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.cisco.EtradeBot;
+package com.RichInTheUSA.EtradeBot;
 
-import static com.cisco.EtradeBot.Credentials.getEtradeConsumerKey;
-import static com.cisco.EtradeBot.Credentials.getEtradeConsumerSecret;
-import static com.cisco.EtradeBot.ETradeBot.e;
+import static com.RichInTheUSA.EtradeBot.Credentials.getEtradeConsumerKey;
+import static com.RichInTheUSA.EtradeBot.Credentials.getEtradeConsumerSecret;
+import static com.RichInTheUSA.EtradeBot.ETradeBot.e;
 import com.etrade.etws.account.Account;
 import com.etrade.etws.account.AccountBalanceResponse;
 import com.etrade.etws.account.AccountListResponse;
